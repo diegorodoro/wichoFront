@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 // import SignIn from "./pages/SignIn";
 // import SignUp from "./pages/SignUp";
-// import Home from "./pages/Home";
+import Main from "./views/Main/Main";
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
 
         {/* Rutas con layout */}
         <Route element={<Layout />}>
-          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/main" element={<Main />} />
           {/* Agrega más rutas con el layout común aquí */}
         </Route>
       </Routes>
