@@ -7,9 +7,7 @@ const Header = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
-
-    // Función para determinar si una ruta está activa
+    const { user, logout } = useAuth();    // Función para determinar si una ruta está activa
     const isActive = (path: string) => location.pathname === path;
 
     // Función para alternar la visibilidad del modal de perfil
@@ -20,7 +18,9 @@ const Header = () => {
     // Función para navegar al perfil del usuario
     const goToProfile = () => {
         setShowProfileModal(false); // Cerrar el modal si está abierto
-        navigate('/perfil');
+        setTimeout(() => { // Pequeño retraso para asegurar que el modal se cierre antes de navegar
+            navigate('/perfil');
+        }, 100);
     };
 
     // Función para manejar el cierre de sesión
@@ -31,8 +31,8 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-white shadow-md py-4 px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto">
+        <header className="bg-white shadow-md py-4 px-4 sm:px-6 lg:px-8 sticky top-0 z-50 w-full">
+            <div className="max-w-7xl mx-auto w-full">
                 <nav className="flex items-center justify-between">
                     {/* Logo y nombre */}
                     <div className="flex items-center flex-shrink-0">
@@ -105,26 +105,11 @@ const Header = () => {
 
                     {/* Perfil de usuario y notificaciones */}
                     <div className="hidden md:flex items-center">
-                        {/* Notificaciones */}
-                        <div className="relative">
-                            <button className="p-1 rounded-full text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <span className="sr-only">Ver notificaciones</span>
-                                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 cursor-pointer hover:bg-gray-300 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                    </svg>
-                                </div>
-                                {/* Indicador de notificaciones */}
-                                <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full border-2 border-white text-xs flex items-center justify-center text-white font-bold">2</span>
-                            </button>
-                        </div>
-
                         {/* Perfil de usuario */}
-                        <div className="ml-4 relative">
-                            {/* Cambiado para ir directamente al perfil */}
+                        <div className="ml-4 relative">                            {/* Botón para abrir el modal del perfil */}
                             <div className="flex items-center">
-                                <button 
-                                    onClick={goToProfile} 
+                                <button
+                                    onClick={toggleProfileModal}
                                     className="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 focus:outline-none transition-colors duration-200 cursor-pointer"
                                 >
                                     {user?.profileImage ? (
@@ -139,21 +124,14 @@ const Header = () => {
                                         </div>
                                     )}
                                     <span className="ml-2 hidden lg:block">{user?.name.split(' ')[0]}</span>
-                                </button>
-                                {/* Botón separado para el menú desplegable */}
-                                <button 
-                                    onClick={toggleProfileModal}
-                                    className="ml-1 focus:outline-none"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {/* Flecha desplegable integrada */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
-                            </div>
-
-                            {/* Modal de perfil */}
+                            </div>                            {/* Modal de perfil */}
                             {showProfileModal && (
-                                <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200" onClick={(e) => e.stopPropagation()}>
                                     <div className="px-4 py-3 border-b border-gray-200">
                                         <div className="flex items-center">
                                             {user?.profileImage ? (
@@ -173,12 +151,36 @@ const Header = () => {
                                                 <p className="text-xs text-gray-500">{user?.role}</p>
                                             </div>
                                         </div>
-                                    </div>
-                                    <Link to="/perfil" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Perfil</Link>
-                                    <Link to="/configuracion" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configuración</Link>
-                                    <Link to="/ayuda" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ayuda</Link>
-                                    <div className="border-t border-gray-200"></div>
-                                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                    </div>                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Previene la propagación del evento
+                                            goToProfile(); // Usamos la función dedicada para navegar al perfil
+                                        }}
+                                        className="w-full text-left block px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                    >
+                                        Mi Perfil
+                                    </button>                                    <Link
+                                        to="/configuracion"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowProfileModal(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Configuración
+                                    </Link>
+                                    <Link
+                                        to="/ayuda"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowProfileModal(false);
+                                        }}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Ayuda
+                                    </Link>                                <div className="border-t border-gray-200"></div>
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLogout(); // Esto maneja el cierre de sesión y la navegación
+                                    }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                                         Cerrar sesión
                                     </button>
                                 </div>
@@ -187,30 +189,36 @@ const Header = () => {
                     </div>
 
                     {/* Botón de menú móvil */}
-                    <div className="md:hidden flex items-center space-x-2">
-                        {/* Perfil compacto para móvil - Actualizado para ir directamente al perfil */}
+                    <div className="md:hidden flex items-center space-x-2">                        {/* Perfil compacto para móvil - Abre el modal de perfil */}
                         <div className="relative">
-                            <button onClick={goToProfile} className="flex items-center p-1">
+                            <button onClick={toggleProfileModal} className="flex items-center p-1">
                                 <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold">
                                     {user?.name.split(' ').map(n => n[0]).join('')}
                                 </div>
-                            </button>
-
-                            {/* Modal de perfil móvil */}
+                            </button>                            {/* Modal de perfil móvil */}
                             {showProfileModal && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200" onClick={(e) => e.stopPropagation()}>
                                     <div className="px-4 py-2 border-b border-gray-200">
                                         <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                                        <p className="text-xs text-gray-500">{user?.email}</p>
-                                    </div>
-                                    <Link to="/perfil" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Perfil</Link>
-                                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <p className="text-xs text-gray-500">{user?.email}</p>                                    </div>                                    <button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Previene la propagación del evento
+                                                goToProfile(); // Usamos la función dedicada para navegar al perfil
+                                            }}
+                                            className="w-full text-left block px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                        >
+                                        Mi Perfil
+                                    </button>
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLogout();
+                                    }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                                         Cerrar sesión
                                     </button>
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* Botón de menú hamburguesa */}
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -279,13 +287,13 @@ const Header = () => {
                         </Link>
                     </div>
                 </div>
-            </div>
-
-            {/* Capa oscura para cerrar el modal al hacer clic fuera */}
-            {showProfileModal && (
+            </div>            {/* Capa oscura para cerrar el modal al hacer clic fuera */}    {showProfileModal && (
                 <div
-                    className="fixed inset-0 z-40 bg-transparent"
-                    onClick={() => setShowProfileModal(false)}
+                    className="fixed inset-0 z-30 bg-transparent"
+                    onClick={() => {
+                        // Capa transparente que cierra el modal al hacer clic
+                        setShowProfileModal(false);
+                    }}
                 ></div>
             )}
         </header>

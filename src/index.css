@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Estilos globales para mantener consistencia en todas las páginas */
+html,
+body,
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
