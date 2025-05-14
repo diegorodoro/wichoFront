@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 
 // Interfaz basada en el esquema de la BD
-interface StudentProfile {
-    estudiante_id?: number;
+// Interfaces separadas para reflejar la estructura de la base de datos
+interface Usuario {
     usuario_id?: number;
     name: string;
     email: string;
@@ -11,13 +11,23 @@ interface StudentProfile {
     phone?: string;
     birthDate?: string;
     address?: string;
-    matricula?: string;
-    career?: string;
-    semester?: number;
-    admissionDate?: string;
+    role?: string;
+}
+
+interface Estudiante {
+    estudiante_id?: number;
+    usuario_id?: number;
+    matricula: string;
+    carrera?: string;
+    semestre?: number;
+    fecha_ingreso?: string;
+}
+
+// Interfaz combinada para facilidad de uso en la aplicación
+interface StudentProfile extends Usuario, Estudiante {
+    // Campos derivados o calculados no directamente en DB
     academicStatus?: string;
     gpa?: number;
-    role?: string;
 }
 
 const Profile: React.FC = () => {
@@ -26,19 +36,22 @@ const Profile: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveLoading, setSaveLoading] = useState(false);
-    const [saveSuccess, setSaveSuccess] = useState(false);
-
-    // Datos del estudiante desde la BD
+    const [saveSuccess, setSaveSuccess] = useState(false);    // Datos del estudiante desde la BD
     const [studentData, setStudentData] = useState<StudentProfile>({
+        // Campos de Usuario
         name: user?.name || 'Nombre Estudiante',
         email: user?.email || 'estudiante@universidad.edu',
         phone: '555-123-4567',
         birthDate: '2000-05-15',
         address: 'Calle Universidad 123',
+
+        // Campos de Estudiante (nomenclatura de la BD)
         matricula: 'A12345',
-        career: 'Ingeniería Informática',
-        semester: 3,
-        admissionDate: '2023-08-15',
+        carrera: 'Ingeniería Informática',
+        semestre: 3,
+        fecha_ingreso: '2023-08-15',
+
+        // Campos derivados o calculados
         academicStatus: 'Regular',
         gpa: 8.7,
     });
@@ -58,7 +71,7 @@ const Profile: React.FC = () => {
                 // Simulamos una respuesta exitosa con datos de prueba
                 setTimeout(() => {
                     setStudentData({
-                        estudiante_id: 1,
+                        // Campos de Usuario
                         usuario_id: parseInt(user.id),
                         name: user.name,
                         email: user.email,
@@ -66,13 +79,18 @@ const Profile: React.FC = () => {
                         phone: '555-123-4567',
                         birthDate: '2000-05-15',
                         address: 'Calle Universidad 123',
+                        role: user.role,
+
+                        // Campos de Estudiante (nomenclatura de la BD)
+                        estudiante_id: 1,
                         matricula: 'A12345',
-                        career: 'Ingeniería Informática',
-                        semester: 3,
-                        admissionDate: '2023-08-15',
+                        carrera: 'Ingeniería Informática',
+                        semestre: 3,
+                        fecha_ingreso: '2023-08-15',
+
+                        // Campos derivados o calculados
                         academicStatus: 'Regular',
-                        gpa: 8.7,
-                        role: user.role
+                        gpa: 8.7
                     });
                     setLoading(false);
                 }, 800);
@@ -302,19 +320,18 @@ const Profile: React.FC = () => {
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Matrícula</h3>
                             <p className="font-semibold text-gray-900">{studentData.matricula}</p>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
+                        </div>                        <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Carrera</h3>
-                            <p className="font-semibold text-gray-900">{studentData.career}</p>
+                            <p className="font-semibold text-gray-900">{studentData.carrera}</p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Semestre actual</h3>
-                            <p className="font-semibold text-gray-900">{studentData.semester}º Semestre</p>
+                            <p className="font-semibold text-gray-900">{studentData.semestre}º Semestre</p>
                         </div>                        <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Fecha de ingreso</h3>
                             <p className="font-semibold text-gray-900">
-                                {studentData.admissionDate && studentData.admissionDate !== ''
-                                    ? new Date(studentData.admissionDate).toLocaleDateString('es-ES')
+                                {studentData.fecha_ingreso && studentData.fecha_ingreso !== ''
+                                    ? new Date(studentData.fecha_ingreso).toLocaleDateString('es-ES')
                                     : 'No disponible'}
                             </p>
                         </div>

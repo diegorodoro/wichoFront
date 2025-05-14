@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Layout from "./components/Layout";
+import LayoutAdmin from "./views/Admin/LayoutAdmin";
 import LayoutStudent from "./views/Student/LayoutStudent";
 import { useAuth } from "./context/AuthContext";
 
@@ -11,6 +11,7 @@ import AdminProfile from "./views/Student/Profile/Profile";
 // Importaciones para vistas de estudiante
 import StudentMain from "./views/Student/Main/Main";
 import StudentProfile from "./views/Student/Profile/Profile";
+import Grades from "./views/Student/Grades/Grades";
 
 // Vistas compartidas
 import Subjects from "./views/Student/Subjects/Subjects";
@@ -38,7 +39,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
 
         {/* Rutas de administrador */}
-        <Route path="/admin" element={<Layout />}>
+        <Route path="/admin" element={<LayoutAdmin />}>
           <Route path="" element={<AdminMain />} />
           <Route path="inicio" element={<AdminMain />} />
           <Route path="materias" element={<Subjects />} />
@@ -52,6 +53,7 @@ function App() {
           <Route path="inicio" element={<StudentMain />} />
           <Route path="materias" element={<Subjects />} />
           <Route path="perfil" element={<StudentProfile />} />
+          <Route path="calificaciones" element={<Grades />} />
         </Route>
 
         {/* Redirección de rutas antiguas a las nuevas según rol */}
@@ -66,6 +68,9 @@ function App() {
         } />
         <Route path="/alumnos" element={
           <Navigate to="/admin/alumnos" />
+        } />
+        <Route path="/calificaciones" element={
+          <Navigate to="/estudiante/calificaciones" />
         } />
         <Route path="/perfil" element={
           <RoleBasedRedirect adminPath="/admin/perfil" studentPath="/estudiante/perfil" />

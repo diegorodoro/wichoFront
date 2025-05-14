@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
 
-// Interfaces basadas en la estructura de la BD
-interface Subject {
-    materia_id: number;
-    codigo: string;
-    nombre: string;
-    creditos: number;
-    descripcion: string;
-}
-
-interface Course {
+// Interfaces basadas en la estructura de la BD PostgreSQL
+interface Curso {
     curso_id: number;
     materia_id: number;
     profesor_id: number;
-    semestre: string;
+    periodo: string;      // Período académico (ej. "2025-1" para primavera)
     ano_academico: number;
     cupo_maximo: number;
     activo: boolean;
-    // Propiedades adicionales obtenidas de joins
+    // Datos relacionados (vendrían de JOINs)
     codigo_materia: string;
     nombre_materia: string;
     creditos: number;
@@ -26,17 +18,18 @@ interface Course {
     departamento: string;
     // Información calculada
     cupo_disponible: number;
-    horario: string; // Esto podría venir de otra tabla en el backend
+    horario: string; // Este dato podría venir de una tabla de horarios
+    [key: string]: any; // Para permitir el filtrado dinámico
 }
 
-interface Enrollment {
+interface Inscripcion {
     inscripcion_id: number;
     estudiante_id: number;
     curso_id: number;
     fecha_inscripcion: string;
     calificacion?: number;
-    aprobado?: boolean;
-    // Datos adicionales del curso inscrito
+    estado?: string; // "cursando", "aprobado", "reprobado"
+    // Datos adicionales del curso inscrito (vendrían de JOINs)
     codigo_materia: string;
     nombre_materia: string;
     creditos: number;
@@ -45,8 +38,8 @@ interface Enrollment {
 }
 
 const Subjects: React.FC = () => {
-    const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
-    const [enrolledCourses, setEnrolledCourses] = useState<Enrollment[]>([]);
+    const [availableCourses, setAvailableCourses] = useState<Curso[]>([]);
+    const [enrolledCourses, setEnrolledCourses] = useState<Inscripcion[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterBy, setFilterBy] = useState('nombre_materia');
     const [isLoading, setIsLoading] = useState(false);
@@ -58,11 +51,11 @@ const Subjects: React.FC = () => {
         // Simulación de carga de datos
         setIsLoading(true);
         setTimeout(() => {
-            const mockCourses: Course[] = [{
+            const mockCourses: Curso[] = [{
                 curso_id: 1,
                 materia_id: 1,
                 profesor_id: 1,
-                semestre: "2025-1", // 1: primavera
+                periodo: "2025-1", // 1: primavera
                 ano_academico: 2025,
                 cupo_maximo: 30,
                 activo: true,
@@ -78,7 +71,7 @@ const Subjects: React.FC = () => {
                 curso_id: 2,
                 materia_id: 2,
                 profesor_id: 2,
-                semestre: "2025-1", // 1: primavera
+                periodo: "2025-1", // 1: primavera
                 ano_academico: 2025,
                 cupo_maximo: 25,
                 activo: true,
@@ -94,7 +87,7 @@ const Subjects: React.FC = () => {
                 curso_id: 3,
                 materia_id: 3,
                 profesor_id: 3,
-                semestre: "2025-2", // 2: verano
+                periodo: "2025-2", // 2: verano
                 ano_academico: 2025,
                 cupo_maximo: 20,
                 activo: true,
@@ -110,7 +103,7 @@ const Subjects: React.FC = () => {
                 curso_id: 4,
                 materia_id: 4,
                 profesor_id: 4,
-                semestre: "2025-2", // 2: verano
+                periodo: "2025-2", // 2: verano
                 ano_academico: 2025,
                 cupo_maximo: 15,
                 activo: true,
@@ -127,7 +120,7 @@ const Subjects: React.FC = () => {
                 curso_id: 5,
                 materia_id: 5,
                 profesor_id: 5,
-                semestre: "Primavera",
+                periodo: "Primavera",
                 ano_academico: 2025,
                 cupo_maximo: 35,
                 activo: true,
@@ -144,7 +137,7 @@ const Subjects: React.FC = () => {
                 curso_id: 6,
                 materia_id: 6,
                 profesor_id: 6,
-                semestre: "Primavera",
+                periodo: "Primavera",
                 ano_academico: 2025,
                 cupo_maximo: 40,
                 activo: true,
@@ -195,11 +188,12 @@ const Subjects: React.FC = () => {
         }
 
         // Crear la nueva inscripción
-        const newEnrollment: Enrollment = {
+        const newEnrollment: Inscripcion = {
             inscripcion_id: Date.now() + courseId, // Simulación de ID único
             estudiante_id: 1, // ID del estudiante actual
             curso_id: courseId,
             fecha_inscripcion: new Date().toISOString(),
+            estado: 'cursando', // Estado por defecto al inscribirse
             codigo_materia: courseToEnroll.codigo_materia,
             nombre_materia: courseToEnroll.nombre_materia,
             creditos: courseToEnroll.creditos,
@@ -223,44 +217,46 @@ const Subjects: React.FC = () => {
             })
         );
 
-        setSuccessMessage('¡Curso inscrito con éxito!');
+        setSuccessMessage('Curso inscrito con éxito');
         setTimeout(() => setSuccessMessage(''), 3000);
     };
 
-    const handleUnenroll = (inscriptionId: number, courseId: number) => {
-        // Buscar el curso que se está dando de baja
-        const courseToUnenroll = enrolledCourses.find(course => course.inscripcion_id === inscriptionId);
+    const handleUnenroll = (enrollmentId: number, courseId: number) => {
+        // Verificar si el curso está inscrito
+        const enrollmentToUnenroll = enrolledCourses.find(enrollment => enrollment.inscripcion_id === enrollmentId);
 
-        // Eliminar la inscripción
-        setEnrolledCourses(prev =>
-            prev.filter(course => course.inscripcion_id !== inscriptionId)
-        );
-
-        // Aumentar el cupo disponible
-        if (courseToUnenroll) {
-            setAvailableCourses(prev =>
-                prev.map(course => {
-                    if (course.curso_id === courseId) {
-                        return {
-                            ...course,
-                            cupo_disponible: course.cupo_disponible + 1
-                        };
-                    }
-                    return course;
-                })
-            );
+        if (!enrollmentToUnenroll) {
+            setError('No estás inscrito en este curso');
+            setTimeout(() => setError(''), 3000);
+            return;
         }
+
+        // Actualizar la lista de cursos inscritos (eliminar la inscripción)
+        setEnrolledCourses(prev => prev.filter(enrollment => enrollment.inscripcion_id !== enrollmentId));
+
+        // Actualizar cupos disponibles
+        setAvailableCourses(prev =>
+            prev.map(course => {
+                if (course.curso_id === courseId) {
+                    return {
+                        ...course,
+                        cupo_disponible: course.cupo_disponible + 1
+                    };
+                }
+                return course;
+            })
+        );
 
         setSuccessMessage('Curso dado de baja con éxito');
         setTimeout(() => setSuccessMessage(''), 3000);
     };
 
     const filteredCourses = availableCourses.filter(course => {
-        const value = String(course[filterBy as keyof Course]).toLowerCase();
+        const value = String(course[filterBy as keyof Curso]).toLowerCase();
         return value.includes(searchTerm.toLowerCase());
     });
 
-    const totalCredits = enrolledCourses.reduce((sum, course) => sum + course.creditos, 0);
+    const totalCredits = enrolledCourses.reduce((sum, course) => sum + (course.creditos || 0), 0);
     const totalAvailableCourses = availableCourses.length;
     const totalEnrolledCourses = enrolledCourses.length;
 
@@ -390,8 +386,8 @@ const Subjects: React.FC = () => {
                                                             <h3 className="font-medium">{course.nombre_materia}</h3>
                                                             <p className="text-gray-500 text-sm">{course.codigo_materia}</p>
                                                         </div>
-                                                        <span className={`px-2 py-1 rounded-full text-xs self-start ${course.cupo_disponible > 10 ? 'bg-green-100 text-green-800' :
-                                                            course.cupo_disponible > 5 ? 'bg-yellow-100 text-yellow-800' :
+                                                        <span className={`px-2 py-1 rounded-full text-xs self-start ${course.cupo_disponible && course.cupo_disponible > 10 ? 'bg-green-100 text-green-800' :
+                                                            course.cupo_disponible && course.cupo_disponible > 5 ? 'bg-yellow-100 text-yellow-800' :
                                                                 'bg-red-100 text-red-800'}`}
                                                         >
                                                             {course.cupo_disponible} cupos
@@ -400,7 +396,7 @@ const Subjects: React.FC = () => {
                                                     <div className="mt-2 text-sm text-gray-500">
                                                         <p>{course.nombre_profesor} {course.apellido_profesor}</p>
                                                         <p>{course.horario}</p>
-                                                        <p className="mt-1">Semestre: {course.semestre} {course.ano_academico}</p>
+                                                        <p className="mt-1">Semestre: {course.periodo} {course.ano_academico}</p>
                                                         <p>Departamento: {course.departamento}</p>
                                                     </div>
                                                     <div className="mt-3 flex justify-between items-center">
@@ -412,15 +408,15 @@ const Subjects: React.FC = () => {
                                                             }}
                                                             className={`px-3 py-1.5 rounded-md transition flex items-center text-sm ${enrolledCourses.some(enrollment => enrollment.curso_id === course.curso_id)
                                                                 ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                                                                : course.cupo_disponible <= 0
+                                                                : course.cupo_disponible && course.cupo_disponible <= 0
                                                                     ? 'bg-red-100 text-red-600 cursor-not-allowed'
                                                                     : 'bg-blue-600 text-white hover:bg-blue-700'
                                                                 }`}
-                                                            disabled={enrolledCourses.some(enrollment => enrollment.curso_id === course.curso_id) || course.cupo_disponible <= 0}
+                                                            disabled={enrolledCourses.some(enrollment => enrollment.curso_id === course.curso_id) || (course.cupo_disponible !== undefined && course.cupo_disponible <= 0)}
                                                         >
                                                             {enrolledCourses.some(enrollment => enrollment.curso_id === course.curso_id) ? (
                                                                 <span>Ya inscrito</span>
-                                                            ) : course.cupo_disponible <= 0 ? (
+                                                            ) : course.cupo_disponible && course.cupo_disponible <= 0 ? (
                                                                 <span>Sin cupo</span>
                                                             ) : (
                                                                 <>
@@ -474,11 +470,27 @@ const Subjects: React.FC = () => {
                                                         <h3 className="font-medium">{enrollment.nombre_materia}</h3>
                                                         <p className="text-xs text-gray-500">{enrollment.codigo_materia} • {enrollment.horario}</p>
                                                         <p className="text-xs text-gray-500">Profesor: {enrollment.profesor}</p>
+                                                        {enrollment.estado && (
+                                                            <span className={`text-xs px-1.5 py-0.5 rounded ${enrollment.estado === 'aprobado' ? 'bg-green-100 text-green-800' :
+                                                                    enrollment.estado === 'reprobado' ? 'bg-red-100 text-red-800' :
+                                                                        'bg-yellow-100 text-yellow-800'
+                                                                }`}>
+                                                                {enrollment.estado === 'aprobado' ? 'Aprobado' :
+                                                                    enrollment.estado === 'reprobado' ? 'Reprobado' :
+                                                                        'Cursando'}
+                                                            </span>
+                                                        )}
+                                                        {enrollment.calificacion !== undefined && (
+                                                            <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                                                                Calificación: {enrollment.calificacion}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <button
                                                         onClick={() => handleUnenroll(enrollment.inscripcion_id, enrollment.curso_id)}
                                                         className="p-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200 transition duration-300"
                                                         title="Dar de baja"
+                                                        disabled={enrollment.estado === 'aprobado' || enrollment.estado === 'reprobado'}
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

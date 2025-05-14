@@ -1,23 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 
+/**
+ * Componente de perfil que muestra la información del estudiante.
+ * 
+ * Este componente se integra con el esquema de la base de datos PostgreSQL:
+ * - La tabla `usuarios` proporciona los datos básicos del usuario (nombre, apellido, email, etc.)
+ * - La tabla `estudiantes` proporciona información académica (matrícula, carrera, semestre)
+ * - Los campos como 'phone' y 'address' son extensiones UI que deberían guardarse en la tabla 'usuarios'
+ * - Hay campos calculados como 'fullName', 'academicStatus', y 'gpa' para la UI
+ */
+
 // Interfaz basada en el esquema de la BD
-interface StudentProfile {
+// Interfaces separadas para reflejar la estructura de la base de datos
+interface Usuario {
+    usuario_id?: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    nombre_usuario?: string;
+    rol_id?: number;
+    activo?: boolean;
+    fecha_creacion?: string;
+    ultimo_acceso?: string;
+    phone?: string; // Campo adicional para UI
+    address?: string; // Campo adicional para UI
+}
+
+interface Estudiante {
     estudiante_id?: number;
     usuario_id?: number;
-    name: string;
-    email: string;
-    username?: string;
-    phone?: string;
-    birthDate?: string;
-    address?: string;
-    matricula?: string;
-    career?: string;
-    semester?: number;
-    admissionDate?: string;
+    matricula: string;
+    carrera?: string;
+    semestre?: number;
+    fecha_ingreso?: string;
+}
+
+// Interfaz combinada para facilidad de uso en la aplicación
+interface StudentProfile extends Usuario, Estudiante {
+    // Campos derivados o calculados no directamente en DB
     academicStatus?: string;
     gpa?: number;
-    role?: string;
+    // Campo calculado para nombre completo
+    fullName?: string;
+    // Campo para compatibilidad con la UI
+    birthDate?: string;
 }
 
 const Profile: React.FC = () => {
@@ -26,19 +53,24 @@ const Profile: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveLoading, setSaveLoading] = useState(false);
-    const [saveSuccess, setSaveSuccess] = useState(false);
-
-    // Datos del estudiante desde la BD
+    const [saveSuccess, setSaveSuccess] = useState(false);    // Datos del estudiante desde la BD
     const [studentData, setStudentData] = useState<StudentProfile>({
-        name: user?.name || 'Nombre Estudiante',
+        // Campos de Usuario
+        nombre: user?.name?.split(' ')[0] || 'Nombre',
+        apellido: user?.name?.split(' ')[1] || 'Estudiante',
         email: user?.email || 'estudiante@universidad.edu',
         phone: '555-123-4567',
         birthDate: '2000-05-15',
         address: 'Calle Universidad 123',
+        fullName: user?.name || 'Nombre Estudiante',
+
+        // Campos de Estudiante (nomenclatura de la BD)
         matricula: 'A12345',
-        career: 'Ingeniería Informática',
-        semester: 3,
-        admissionDate: '2023-08-15',
+        carrera: 'Ingeniería Informática',
+        semestre: 3,
+        fecha_ingreso: '2023-08-15',
+
+        // Campos derivados o calculados
         academicStatus: 'Regular',
         gpa: 8.7,
     });
@@ -53,26 +85,31 @@ const Profile: React.FC = () => {
                 // En un entorno real, esta sería una llamada a la API
                 // const response = await fetch(`/api/estudiantes/usuario/${user.id}`);
                 // if (!response.ok) throw new Error('Error al cargar datos del estudiante');
-                // const data = await response.json();
-
-                // Simulamos una respuesta exitosa con datos de prueba
+                // const data = await response.json();                // Simulamos una respuesta exitosa con datos de prueba
                 setTimeout(() => {
                     setStudentData({
-                        estudiante_id: 1,
+                        // Campos de Usuario
                         usuario_id: parseInt(user.id),
-                        name: user.name,
+                        nombre: user.name.split(' ')[0] || 'Nombre',
+                        apellido: user.name.split(' ')[1] || 'Apellido',
                         email: user.email,
-                        username: user.email.split('@')[0],
+                        nombre_usuario: user.email.split('@')[0],
                         phone: '555-123-4567',
                         birthDate: '2000-05-15',
                         address: 'Calle Universidad 123',
+                        rol_id: 1, // ID del rol estudiante
+                        fullName: user.name, // Campo calculado para la UI
+
+                        // Campos de Estudiante (nomenclatura de la BD)
+                        estudiante_id: 1,
                         matricula: 'A12345',
-                        career: 'Ingeniería Informática',
-                        semester: 3,
-                        admissionDate: '2023-08-15',
+                        carrera: 'Ingeniería Informática',
+                        semestre: 3,
+                        fecha_ingreso: '2023-08-15',
+
+                        // Campos derivados o calculados
                         academicStatus: 'Regular',
-                        gpa: 8.7,
-                        role: user.role
+                        gpa: 8.7
                     });
                     setLoading(false);
                 }, 800);
@@ -90,10 +127,8 @@ const Profile: React.FC = () => {
     // Actualizar formData cuando se actualiza studentData (al cargar)
     useEffect(() => {
         setFormData({ ...studentData });
-    }, [studentData]);
-
-    // Lista de campos que el estudiante puede editar
-    const editableFields = ['phone', 'address'];
+    }, [studentData]);    // Lista de campos que el estudiante puede editar (basado en el esquema de BD)
+    const editableFields = ['phone', 'address']; // Estos campos no están en la tabla usuarios directamente, sino que son extensiones para la UI
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -183,103 +218,100 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="p-6">
-                    <div className="flex flex-col md:flex-row mb-6">
-                        <div className="md:w-1/4 mb-4 md:mb-0">
-                            <div className="h-40 w-40 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 text-5xl font-semibold mx-auto">
-                                {studentData.name.split(' ').map(n => n[0]).join('')}
+                    <div className="flex flex-col md:flex-row mb-6">                        <div className="md:w-1/4 mb-4 md:mb-0">
+                        <div className="h-40 w-40 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 text-5xl font-semibold mx-auto">
+                            {`${studentData.nombre?.[0] || ''}${studentData.apellido?.[0] || ''}`}
+                        </div>
+                    </div>
+                        <div className="md:w-3/4 md:pl-8">                            {editing ? (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={`${formData.nombre} ${formData.apellido}`}
+                                    onChange={handleChange}
+                                    disabled={true}
+                                    className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    title="Este campo no puede modificarse"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    disabled={true}
+                                    className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    title="Este campo no puede modificarse"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    value={formData.phone || ''}
+                                    onChange={handleChange}
+                                    className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:border-blue-500"
+                                />
+                                <p className="text-xs text-green-600 mt-1">Puedes modificar este campo</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
+                                <input
+                                    type="date"
+                                    name="birthDate"
+                                    value={formData.birthDate || ''}
+                                    onChange={handleChange}
+                                    disabled={true}
+                                    className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    title="Este campo no puede modificarse"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    value={formData.address || ''}
+                                    onChange={handleChange}
+                                    className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:border-blue-500"
+                                />
+                                <p className="text-xs text-green-600 mt-1">Puedes modificar este campo</p>
                             </div>
                         </div>
-                        <div className="md:w-3/4 md:pl-8">
-                            {editing ? (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        disabled={true}
-                                        className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
-                                        title="Este campo no puede modificarse"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        disabled={true}
-                                        className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
-                                        title="Este campo no puede modificarse"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                                    <input
-                                        type="text"
-                                        name="phone"
-                                        value={formData.phone || ''}
-                                        onChange={handleChange}
-                                        className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:border-blue-500"
-                                    />
-                                    <p className="text-xs text-green-600 mt-1">Puedes modificar este campo</p>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
-                                    <input
-                                        type="date"
-                                        name="birthDate"
-                                        value={formData.birthDate || ''}
-                                        onChange={handleChange}
-                                        disabled={true}
-                                        className="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-500 cursor-not-allowed"
-                                        title="Este campo no puede modificarse"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">No editable - Contactar administración</p>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address || ''}
-                                        onChange={handleChange}
-                                        className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:border-blue-500"
-                                    />
-                                    <p className="text-xs text-green-600 mt-1">Puedes modificar este campo</p>
-                                </div>
+                        ) : (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">Nombre completo</h3>
+                                <p className="font-medium text-gray-900">{`${studentData.nombre} ${studentData.apellido}`}</p>
                             </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <h3 className="text-sm font-medium text-gray-500">Nombre completo</h3>
-                                        <p className="font-medium text-gray-900">{studentData.name}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-gray-500">Correo electrónico</h3>
-                                        <p className="font-medium text-gray-900">{studentData.email}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-medium text-gray-500">Teléfono</h3>
-                                        <p className="font-medium text-gray-900">{studentData.phone}</p>
-                                    </div>                                    <div>
-                                        <h3 className="text-sm font-medium text-gray-500">Fecha de nacimiento</h3>
-                                        <p className="font-medium text-gray-900">
-                                            {studentData.birthDate && studentData.birthDate !== ''
-                                                ? new Date(studentData.birthDate).toLocaleDateString('es-ES')
-                                                : 'No disponible'}
-                                        </p>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                        <h3 className="text-sm font-medium text-gray-500">Dirección</h3>
-                                        <p className="font-medium text-gray-900">{studentData.address}</p>
-                                    </div>
-                                </div>
-                            )}
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">Correo electrónico</h3>
+                                <p className="font-medium text-gray-900">{studentData.email}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500">Teléfono</h3>
+                                <p className="font-medium text-gray-900">{studentData.phone}</p>
+                            </div>                                    <div>
+                                <h3 className="text-sm font-medium text-gray-500">Fecha de nacimiento</h3>
+                                <p className="font-medium text-gray-900">
+                                    {studentData.birthDate && studentData.birthDate !== ''
+                                        ? new Date(studentData.birthDate).toLocaleDateString('es-ES')
+                                        : 'No disponible'}
+                                </p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <h3 className="text-sm font-medium text-gray-500">Dirección</h3>
+                                <p className="font-medium text-gray-900">{studentData.address}</p>
+                            </div>
+                        </div>
+                        )}
                         </div>
                     </div>
                 </div>
@@ -305,16 +337,17 @@ const Profile: React.FC = () => {
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Carrera</h3>
-                            <p className="font-semibold text-gray-900">{studentData.career}</p>
+                            <p className="font-semibold text-gray-900">{studentData.carrera}</p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Semestre actual</h3>
-                            <p className="font-semibold text-gray-900">{studentData.semester}º Semestre</p>
-                        </div>                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="font-semibold text-gray-900">{studentData.semestre}º Semestre</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="text-sm font-medium text-gray-500 mb-1">Fecha de ingreso</h3>
                             <p className="font-semibold text-gray-900">
-                                {studentData.admissionDate && studentData.admissionDate !== ''
-                                    ? new Date(studentData.admissionDate).toLocaleDateString('es-ES')
+                                {studentData.fecha_ingreso && studentData.fecha_ingreso !== ''
+                                    ? new Date(studentData.fecha_ingreso).toLocaleDateString('es-ES')
                                     : 'No disponible'}
                             </p>
                         </div>
