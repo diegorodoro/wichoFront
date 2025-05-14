@@ -264,6 +264,7 @@
 			const totalAvailableCourses = availableCourses.length;
 			const totalEnrolledCourses = enrolledCourses.length;
 
+<<<<<<< HEAD
 			return (
 					<div className="min-h-[80vh] flex flex-col">
 							{/* Banner principal */}
@@ -541,5 +542,14 @@
 					</div>
 			);
 	};
+=======
+    return (
+        <div>
+            <h1>Subjects</h1>
+            <p>Welcome to the Subjects page!</p>
+        </div>
+    );
+};
+>>>>>>> 5311961afa11d369dda111635f470702876b15a5
 
 	export default Subjects;

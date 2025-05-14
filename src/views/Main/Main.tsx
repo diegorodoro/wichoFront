@@ -131,7 +131,7 @@ const Main = () => {
             </div>
 
             {/* Recordatorios o anuncios */}
-            <div className="max-w-6xl mx-auto w-full px-4 mt-6">
+            <div className="max-w-6xl mx-auto w-full px-4 mt-6 py-4">
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
                     <div className="flex items-center">
                         <div className="flex-shrink-0">
