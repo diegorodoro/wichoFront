@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthContext";
 // Importaciones para vistas de admin
 import AdminMain from "./views/Student/Main/Main";
 import AdminStudents from "./views/Admin/Students/Students";
+import AdminTeachers from "./views/Admin/Teachers/Teachers";
 import AdminProfile from "./views/Student/Profile/Profile";
 
 // Importaciones para vistas de estudiante
@@ -44,6 +45,7 @@ function App() {
           <Route path="inicio" element={<AdminMain />} />
           <Route path="materias" element={<Subjects />} />
           <Route path="alumnos" element={<AdminStudents />} />
+          <Route path="profesores" element={<AdminTeachers />} />
           <Route path="perfil" element={<AdminProfile />} />
         </Route>
 

@@ -8,18 +8,38 @@ const Header = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();    // Función para determinar si una ruta está activa
-    const isActive = (path: string) => location.pathname === path;
+    const isActive = (path: string) => {
+        // Manejo especial para rutas con estructuras diferentes
+        if (path === '/perfil' && location.pathname === '/admin/perfil') {
+            return true;
+        }
+        // Manejo para las rutas principales
+        else if (path === '/inicio' && location.pathname === '/admin/inicio') {
+            return true;
+        }
+        else if (path === '/materias' && location.pathname === '/admin/materias') {
+            return true;
+        }
+        else if (path === '/alumnos' && location.pathname === '/admin/alumnos') {
+            return true;
+        }
+        else if (path === '/profesores' && location.pathname === '/admin/profesores') {
+            return true;
+        }
+        // Coincidencia exacta de rutas
+        else {
+            return location.pathname === path;
+        }
+    };
 
     // Función para alternar la visibilidad del modal de perfil
     const toggleProfileModal = () => {
         setShowProfileModal(!showProfileModal);
-    };
-
-    // Función para navegar al perfil del usuario
+    };    // Función para navegar al perfil del usuario
     const goToProfile = () => {
         setShowProfileModal(false); // Cerrar el modal si está abierto
         setTimeout(() => { // Pequeño retraso para asegurar que el modal se cierre antes de navegar
-            navigate('/perfil');
+            navigate('/admin/perfil');
         }, 100);
     };
 
@@ -85,9 +105,7 @@ const Header = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
                                 Alumnos
-                            </Link>
-
-                            <Link
+                            </Link>                            <Link
                                 to="/profesores"
                                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center
                                     ${isActive('/profesores')
@@ -273,9 +291,7 @@ const Header = () => {
                                 }`}
                         >
                             Alumnos
-                        </Link>
-
-                        <Link
+                        </Link>                        <Link
                             to="/profesores"
                             className={`block px-3 py-2 rounded-md text-base font-medium 
                                 ${isActive('/profesores')
@@ -287,7 +303,7 @@ const Header = () => {
                         </Link>
                     </div>
                 </div>
-            </div>            {/* Capa oscura para cerrar el modal al hacer clic fuera */}    {showProfileModal && (
+            </div>{/* Capa oscura para cerrar el modal al hacer clic fuera */}    {showProfileModal && (
                 <div
                     className="fixed inset-0 z-30 bg-transparent"
                     onClick={() => {
