@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const Main = () => {
     // En un caso real, esto vendría de tu sistema de autenticación
@@ -58,12 +59,12 @@ const Main = () => {
                             <h3 className="text-xl font-semibold text-gray-800">Materias</h3>
                         </div>
                         <p className="text-gray-600 mb-4">Gestiona tus materias, consulta horarios y calificaciones.</p>
-                        <a href="/materias" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+                        <Link to="/materias" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
                             Ver materias
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Tarjeta 2 */}
@@ -77,12 +78,12 @@ const Main = () => {
                             <h3 className="text-xl font-semibold text-gray-800">Profesores</h3>
                         </div>
                         <p className="text-gray-600 mb-4">Información sobre docentes, contacto y departamentos.</p>
-                        <a href="/profesores" className="text-green-600 hover:text-green-800 font-medium inline-flex items-center">
+                        <Link to="/profesores" className="text-green-600 hover:text-green-800 font-medium inline-flex items-center">
                             Ver profesores
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Tarjeta 3 */}
@@ -96,12 +97,12 @@ const Main = () => {
                             <h3 className="text-xl font-semibold text-gray-800">Alumnos</h3>
                         </div>
                         <p className="text-gray-600 mb-4">Directorio de estudiantes, compañeros de curso y grupos.</p>
-                        <a href="/alumnos" className="text-purple-600 hover:text-purple-800 font-medium inline-flex items-center">
+                        <Link to="/alumnos" className="text-purple-600 hover:text-purple-800 font-medium inline-flex items-center">
                             Ver alumnos
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
