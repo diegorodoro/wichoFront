@@ -62,11 +62,10 @@ const Header = () => {
                         <span className="font-bold text-xl text-gray-800 hidden sm:block">Universidad</span>
                     </div>
 
-                    {/* Enlaces de navegación para pantallas medianas y grandes */}
-                    <div className="hidden md:block">
+                    {/* Enlaces de navegación para pantallas medianas y grandes */}                    <div className="hidden md:block">
                         <div className="ml-10 flex items-center space-x-4">
                             <Link
-                                to="/inicio"
+                                to="/admin/inicio"
                                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center
                                     ${isActive('/inicio')
                                         ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -80,7 +79,7 @@ const Header = () => {
                             </Link>
 
                             <Link
-                                to="/materias"
+                                to="/admin/materias"
                                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center
                                     ${isActive('/materias')
                                         ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -94,7 +93,7 @@ const Header = () => {
                             </Link>
 
                             <Link
-                                to="/alumnos"
+                                to="/admin/alumnos"
                                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center
                                     ${isActive('/alumnos')
                                         ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -106,7 +105,7 @@ const Header = () => {
                                 </svg>
                                 Alumnos
                             </Link>                            <Link
-                                to="/profesores"
+                                to="/admin/profesores"
                                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center
                                     ${isActive('/profesores')
                                         ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -178,7 +177,7 @@ const Header = () => {
                                     >
                                         Mi Perfil
                                     </button>                                    <Link
-                                        to="/configuracion"
+                                        to="/admin/configuracion"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setShowProfileModal(false);
@@ -187,14 +186,14 @@ const Header = () => {
                                         Configuración
                                     </Link>
                                     <Link
-                                        to="/ayuda"
+                                        to="/admin/ayuda"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setShowProfileModal(false);
                                         }}
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Ayuda
-                                    </Link>                                <div className="border-t border-gray-200"></div>
+                                    </Link><div className="border-t border-gray-200"></div>
                                     <button onClick={(e) => {
                                         e.stopPropagation();
                                         handleLogout(); // Esto maneja el cierre de sesión y la navegación
@@ -257,11 +256,10 @@ const Header = () => {
                     </div>
                 </nav>
 
-                {/* Menú móvil */}
-                <div className={`${isOpen ? 'block' : 'hidden'} md:hidden mt-4`}>
+                {/* Menú móvil */}                <div className={`${isOpen ? 'block' : 'hidden'} md:hidden mt-4`}>
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                         <Link
-                            to="/inicio"
+                            to="/admin/inicio"
                             className={`block px-3 py-2 rounded-md text-base font-medium 
                                 ${isActive('/inicio')
                                     ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
@@ -272,7 +270,7 @@ const Header = () => {
                         </Link>
 
                         <Link
-                            to="/materias"
+                            to="/admin/materias"
                             className={`block px-3 py-2 rounded-md text-base font-medium 
                                 ${isActive('/materias')
                                     ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
@@ -283,7 +281,7 @@ const Header = () => {
                         </Link>
 
                         <Link
-                            to="/alumnos"
+                            to="/admin/alumnos"
                             className={`block px-3 py-2 rounded-md text-base font-medium 
                                 ${isActive('/alumnos')
                                     ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'
@@ -292,7 +290,7 @@ const Header = () => {
                         >
                             Alumnos
                         </Link>                        <Link
-                            to="/profesores"
+                            to="/admin/profesores"
                             className={`block px-3 py-2 rounded-md text-base font-medium 
                                 ${isActive('/profesores')
                                     ? 'text-blue-600 bg-blue-50 border-l-4 border-blue-600'

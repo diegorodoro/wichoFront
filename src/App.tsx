@@ -47,6 +47,8 @@ function App() {
           <Route path="alumnos" element={<AdminStudents />} />
           <Route path="profesores" element={<AdminTeachers />} />
           <Route path="perfil" element={<AdminProfile />} />
+          <Route path="configuracion" element={<div className="p-8 text-center">Página de Configuración en desarrollo</div>} />
+          <Route path="ayuda" element={<div className="p-8 text-center">Página de Ayuda en desarrollo</div>} />
         </Route>
 
         {/* Rutas de estudiante */}
